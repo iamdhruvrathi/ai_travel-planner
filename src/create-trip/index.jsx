@@ -17,7 +17,7 @@ function CreateTrip() {
 
     const [loading, setLoading] = useState(false);
 
-    const router = useNavigate();
+    const navigate = useNavigate();
     const handleInputChange = (name, value) => {
         setFormData({
             ...formData,
@@ -63,6 +63,7 @@ function CreateTrip() {
             id: docId
         });
         setLoading(false);
+        navigate('/view-trip/' + docId)
     }
 
     return (
