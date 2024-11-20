@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import InfoSection from '../components/InfoSection';
 import Hotels from '../components/Hotels';
+import PlacesToVisit from '../components/PlacesToVisit';
+import Footer from '../components/Footer';
 
 function Viewtrip() {
 
@@ -36,8 +38,10 @@ function Viewtrip() {
             <Hotels trip={trip} />
 
             {/* Daily Plan */}
+            <PlacesToVisit trip={trip} />
 
             {/* Footer */}
+            <Footer trip={trip} />
         </div>
     )
 }
