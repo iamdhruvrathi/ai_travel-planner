@@ -6,18 +6,18 @@ const PHOTO_REF_URL =
   "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=600&maxWidthPx=600&key=" +
   import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
 
-function PlaceCardItem({ place }) {
+function HotelCardItem({ hotel }) {
   const [photoUrl, setPhotoUrl] = useState("/placeholder.jpg");
 
   useEffect(() => {
-    if (place?.placeName && photoUrl === "/placeholder.jpg") {
+    if (hotel?.hotelName && photoUrl === "/placeholder.jpg") {
       GetPlacePhoto();
     }
-  }, [place?.placeName]);
+  }, [hotel?.hotelName]);
 
   const GetPlacePhoto = async () => {
     try {
-      const result = await GetPlaceDetails(place.placeName);
+      const result = await GetPlaceDetails(hotel.hotelName);
 
       if (result?.places?.[0]?.photos?.[0]?.name) {
         const photoURL = PHOTO_REF_URL.replace(
@@ -27,11 +27,11 @@ function PlaceCardItem({ place }) {
         setPhotoUrl(photoURL);
       }
     } catch (error) {
-      console.error("Error fetching place photo:", error);
+      console.error("Error fetching hotel photo:", error);
     }
   };
 
-  if (!place) {
+  if (!hotel) {
     return (
       <div className="text-gray-500">No data available for this place.</div>
     );
@@ -41,7 +41,7 @@ function PlaceCardItem({ place }) {
     <Link
       to={
         "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent(place?.placeName || "Unknown Location")
+        encodeURIComponent(`${hotel?.hotelName} ${hotel?.hotelAddress}`)
       }
       target="_blank"
       rel="noopener noreferrer"
@@ -49,22 +49,18 @@ function PlaceCardItem({ place }) {
       <div className="hover:scale-105 transition-all cursor-pointer h-full flex flex-col bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md">
         <img
           src={photoUrl}
-          alt={place?.placeName || "Place"}
+          alt={hotel?.hotelName || "Hotel"}
           className="rounded-xl w-full h-40 object-cover"
         />
         <div className="my-2 flex flex-col gap-1 ml-2.5">
-          <h2 className="font-bold text-lg line-clamp-1">
-            {place?.placeName || "Unknown Place"}
-          </h2>
-          <h2 className="text-sm text-gray-500 line-clamp-2">
-            📍 {place?.placeDetails || "No details available"}
-          </h2>
-          <h2 className="text-sm">⭐ {place?.rating || "Not Rated"}</h2>
-          <h2 className="text-sm">⏳ {place?.duration || "N/A"}</h2>
+          <h2 className="font-bold text-lg">{hotel?.hotelName}</h2>
+          <h2 className="text-sm text-gray-500">📍 {hotel?.hotelAddress}</h2>
+          <h2 className="text-sm">💰 {hotel?.price}</h2>
+          <h2 className="text-sm">⭐ {hotel?.rating}</h2>
         </div>
       </div>
     </Link>
   );
 }
 
-export default PlaceCardItem;
+export default HotelCardItem;

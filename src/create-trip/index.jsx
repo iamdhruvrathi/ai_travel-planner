@@ -55,10 +55,19 @@ function CreateTrip() {
         }
       )
       .then((resp) => {
-        console.log(resp);
-        localStorage.setItem("user", JSON.stringify(resp.data));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...resp.data,
+            access_token: tokenInfo.access_token,
+          })
+        );
         setOpenDialog(false);
         OnGenerateTrip();
+      })
+      .catch((error) => {
+        toast.error("Failed to get user profile");
+        setOpenDialog(true);
       });
   };
 
@@ -75,46 +84,71 @@ function CreateTrip() {
       return;
     }
 
-    if (
-      formData?.noOfDays > 5 ||
-      !formData?.location ||
-      !formData?.budget ||
-      !formData?.traveller
-    ) {
-      toast("Please fill all details");
+    if (!formData?.location || !formData?.budget || !formData?.traveller) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (formData?.noOfDays > 5) {
+      toast.error("Trip duration cannot exceed 5 days");
       return;
     }
 
     setLoading(true);
-    const FINAL_PROMPT = AI_PROMPT.replace(
-      "{location}",
-      formData?.location?.label
-    )
-      .replace("{totalDays}", formData?.noOfDays)
-      .replace("{traveller}", formData?.traveller)
-      .replace("{budget}", formData?.budget)
-      .replace("{totalDays}", formData?.noOfDays);
+    try {
+      const userData = JSON.parse(user);
+      const response = await axios
+        .get(
+          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${userData.access_token}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userData.access_token}`,
+              Accept: "application/json",
+            },
+          }
+        )
+        .catch((error) => {
+          localStorage.removeItem("user");
+          setOpenDialog(true);
+          throw new Error("Authentication expired. Please sign in again.");
+        });
 
-    const result = await chatSession.sendMessage(FINAL_PROMPT);
-
-    console.log("--", result?.response?.text());
-    setLoading(false);
-    SaveAiTrip(result?.response?.text());
+      const FINAL_PROMPT = AI_PROMPT.replace(
+        "{location}",
+        formData?.location?.label
+      )
+        .replace("{totalDays}", formData?.noOfDays)
+        .replace("{traveller}", formData?.traveller)
+        .replace("{budget}", formData?.budget)
+        .replace("{totalDays}", formData?.noOfDays);
+      const result = await chatSession.sendMessage(FINAL_PROMPT);
+      SaveAiTrip(result?.response?.text());
+    } catch (error) {
+      toast.error(error.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const SaveAiTrip = async (TripData) => {
     setLoading(true);
-    const user = JSON.parse(localStorage.getItem("user"));
-    const docId = Date.now().toString();
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const docId = Date.now().toString();
 
-    await setDoc(doc(db, "AITrips", docId), {
-      userSelection: formData,
-      tripData: JSON.parse(TripData),
-      //userEmail: user?.email,
-      id: docId,
-    });
-    setLoading(false);
-    navigate("/view-trip/" + docId);
+      await setDoc(doc(db, "AITrips", docId), {
+        userSelection: formData,
+        tripData: JSON.parse(TripData),
+        userEmail: user?.email,
+        id: docId,
+      });
+
+      navigate("/view-trip/" + docId);
+    } catch (error) {
+      toast.error("Failed to save trip. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -213,6 +247,7 @@ function CreateTrip() {
       <Dialog open={openDailog}>
         <DialogContent>
           <DialogHeader>
+            <DialogTitle>Sign In Required</DialogTitle>
             <DialogDescription>
               <img src="/logo.svg" />
               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>

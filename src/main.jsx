@@ -14,25 +14,38 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <>
+        <Header />
+        <App />
+      </>
+    ),
   },
   {
     path: "/create-trip",
-    element: <CreateTrip />,
+    element: (
+      <>
+        <Header />
+        <CreateTrip />
+      </>
+    ),
   },
   {
     path: "/view-trip/:tripId",
-    element: <ViewTrip />,
+    element: (
+      <>
+        <Header />
+        <ViewTrip />
+      </>
+    ),
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_AUTH_CLIENT_ID}>
-      <Header />
       <Toaster />
       <RouterProvider router={router} />
     </GoogleOAuthProvider>
-    ;
   </React.StrictMode>
 );
