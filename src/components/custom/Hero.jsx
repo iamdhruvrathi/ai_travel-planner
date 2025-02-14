@@ -1,104 +1,88 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
-import { MdOutlineExplore, MdLocationOn } from "react-icons/md";
+import { MdOutlineExplore } from "react-icons/md";
 import { FaRoute } from "react-icons/fa";
 import { IoTimeOutline } from "react-icons/io5";
 import Footer from "@/view-trip/components/Footer";
 
-function Hero() {
+const Hero = () => {
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 md:px-8 lg:px-16 max-w-7xl mx-auto mt-6">
-      {/* Background Elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-blue-50" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-100 rounded-full blur-3xl" />
-        {/* Decorative circles */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-200 rounded-full blur-xl" />
-        <div className="absolute bottom-20 right-20 w-32 h-32 bg-indigo-200 rounded-full blur-xl" />
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 max-w-7xl mx-auto mt-6">
+        {/* Background */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute inset-0 bg-blue-50" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[400px] md:w-[500px] h-[300px] sm:h-[400px] md:h-[500px] bg-blue-100 rounded-full blur-3xl" />
+        </div>
 
-      {/* Content */}
-      <div className="flex flex-col items-center gap-9 text-center animate-fade-in">
-        {/* Main Heading */}
-        <h1 className="font-extrabold text-4xl md:text-5xl lg:text-6xl leading-tight max-w-4xl">
-          <span className="text-primary block mb-2 animate-slide-up">
-            Discover Your Next Adventure with AI
-          </span>
-          <span className="animate-slide-up-delay text-gray-800">
-            Personalized Itineraries at Your Fingertips
-          </span>
-        </h1>
+        {/* Content */}
+        <div className="flex flex-col items-center gap-6 sm:gap-8 text-center">
+          {/* Heading */}
+          <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl leading-tight max-w-3xl">
+            <span className="text-primary block mb-2">
+              Plan Your Trip with AI
+            </span>
+            <span className="text-gray-800">Smart Travel Made Simple</span>
+          </h1>
 
-        {/* Subheading */}
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl animate-fade-in-delay">
-          Your personal trip planner and travel curator, creating custom
-          itineraries tailored to your interests and budget. Let AI transform
-          your travel dreams into reality.
-        </p>
+          {/* Subheading */}
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl px-4">
+            Let AI create your perfect travel itinerary based on your interests
+            and budget.
+          </p>
 
-        {/* CTA Button */}
-        <div className="animate-scale-in space-x-4">
+          {/* CTA Button */}
           <Link to="/create-trip">
             <Button
               size="lg"
-              className="group bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
+              className="group bg-primary hover:bg-primary/90 hover:shadow-lg transition-all"
             >
-              <MdOutlineExplore className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-              Start Planning Your Trip
+              <MdOutlineExplore className="mr-2 h-5 w-5" />
+              Start Planning
             </Button>
           </Link>
-        </div>
 
-        {/* Features List */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 animate-fade-in-delay w-full">
-          {[
-            {
-              title: "AI-Powered",
-              desc: "Smart recommendations based on your preferences",
-              icon: <MdOutlineExplore className="w-6 h-6 text-primary" />,
-              bg: "bg-blue-50",
-            },
-            {
-              title: "Personalized",
-              desc: "Tailored to your interests and budget",
-              icon: <FaRoute className="w-6 h-6 text-blue-600" />,
-              bg: "bg-indigo-50",
-            },
-            {
-              title: "Time-Saving",
-              desc: "Complete itineraries in minutes, not hours",
-              icon: <IoTimeOutline className="w-6 h-6 text-indigo-600" />,
-              bg: "bg-blue-50",
-            },
-          ].map((feature, index) => (
-            <div
-              key={index}
-              className={`${feature.bg} backdrop-blur-sm p-8 rounded-xl border border-white/20 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl`}
-            >
-              <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center mb-4 mx-auto">
-                {feature.icon}
+          {/* Features */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-4 w-full px-4">
+            {[
+              {
+                title: "AI-Powered",
+                desc: "Smart recommendations for you",
+                icon: <MdOutlineExplore className="w-6 h-6 text-primary" />,
+              },
+              {
+                title: "Personalized",
+                desc: "Tailored to your preferences",
+                icon: <FaRoute className="w-6 h-6 text-blue-600" />,
+              },
+              {
+                title: "Quick & Easy",
+                desc: "Complete plans in minutes",
+                icon: <IoTimeOutline className="w-6 h-6 text-indigo-600" />,
+              },
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-all"
+              >
+                <div className="bg-blue-50 rounded-full w-10 sm:w-12 h-10 sm:h-12 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
+                  {feature.icon}
+                </div>
+                <h3 className="font-semibold text-base sm:text-lg mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {feature.desc}
+                </p>
               </div>
-              <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Trust Indicators */}
-        <div className="flex flex-wrap justify-center gap-4 mt-8 text-sm text-gray-600 animate-fade-in-delay">
-          <span className="flex items-center">
-            <MdLocationOn className="mr-1" /> 1000+ Destinations
-          </span>
-          <span>•</span>
-          <span>24/7 AI Support</span>
-          <span>•</span>
-          <span>Instant Planning</span>
+            ))}
+          </div>
         </div>
       </div>
       <Footer />
     </div>
   );
-}
+};
 
 export default Hero;
