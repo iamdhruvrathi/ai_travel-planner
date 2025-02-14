@@ -10,6 +10,7 @@ import Header from "./components/custom/Header";
 import { Toaster } from "./components/ui/sonner";
 import ViewTrip from "./view-trip/[tripId]";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import MyTrips from ".";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
         <ViewTrip />
       </>
     ),
+  },
+  {
+    path: "my-trips",
+    element: <MyTrips />,
   },
 ]);
 

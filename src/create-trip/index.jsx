@@ -24,11 +24,12 @@ import {
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import Footer from "@/view-trip/components/Footer.jsx";
 
 function CreateTrip() {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState({});
-  const [openDailog, setOpenDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -97,8 +98,10 @@ function CreateTrip() {
     setLoading(true);
     try {
       const userData = JSON.parse(user);
-      const response = await axios
-        .get(
+
+      // Verify token is still valid
+      try {
+        await axios.get(
           `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${userData.access_token}`,
           {
             headers: {
@@ -106,12 +109,12 @@ function CreateTrip() {
               Accept: "application/json",
             },
           }
-        )
-        .catch((error) => {
-          localStorage.removeItem("user");
-          setOpenDialog(true);
-          throw new Error("Authentication expired. Please sign in again.");
-        });
+        );
+      } catch (error) {
+        localStorage.removeItem("user");
+        setOpenDialog(true);
+        throw new Error("Authentication expired. Please sign in again.");
+      }
 
       const FINAL_PROMPT = AI_PROMPT.replace(
         "{location}",
@@ -244,26 +247,29 @@ function CreateTrip() {
           )}
         </Button>
       </div>
-      <Dialog open={openDailog}>
+      <Dialog open={openDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Sign In Required</DialogTitle>
-            <DialogDescription>
-              <img src="/logo.svg" />
-              <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
-              <p>Sign in to the App with Google authentication securely</p>
-
-              <Button
-                onClick={login}
-                className="w-full mt-5 flex gap-4 items-center"
-              >
-                <FcGoogle className="h-7 w-7" />
-                Sign In With Google
-              </Button>
-            </DialogDescription>
           </DialogHeader>
+
+          <div className="flex flex-col items-center text-center">
+            <img src="/web_logo.png" alt="Logo" className="h-12" />
+            <h2 className="font-bold text-md mt-4">
+              Authenticate securely using Google
+            </h2>
+
+            <Button
+              onClick={login}
+              className="w-full mt-5 flex gap-4 items-center justify-center"
+            >
+              <FcGoogle className="h-7 w-7" />
+              Sign In With Google
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
+      <Footer />
     </div>
   );
 }
