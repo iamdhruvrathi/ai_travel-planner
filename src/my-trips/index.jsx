@@ -10,8 +10,13 @@ function MyTrips() {
   const [userTrips, setUserTrips] = useState([]);
 
   useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      navigate("/");
+      return;
+    }
     GetUserTrips();
-  }, []);
+  }, [navigate]);
 
   const GetUserTrips = async () => {
     const storedUser = localStorage.getItem("user");

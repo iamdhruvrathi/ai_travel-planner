@@ -16,6 +16,7 @@ import {
 import { FcGoogle } from "react-icons/fc";
 import { Menu } from "lucide-react";
 import axios from "axios";
+import SignInDialog from "./SignInDialog";
 
 function Header() {
   const [user, setUser] = useState(null);
@@ -97,9 +98,10 @@ function Header() {
                       className="h-6 w-6 rounded-full cursor-pointer"
                     />
                   </PopoverTrigger>
-                  <PopoverContent>
-                    <h2
-                      className="cursor-pointer text-sm text-red-500 hover:underline"
+                  <PopoverContent className="bg-white p-2 rounded-lg shadow-lg">
+                    <Button
+                      variant="outline"
+                      className="w-full rounded-full text-red-500"
                       onClick={() => {
                         googleLogout();
                         localStorage.clear();
@@ -108,7 +110,7 @@ function Header() {
                       }}
                     >
                       Logout
-                    </h2>
+                    </Button>
                   </PopoverContent>
                 </Popover>
               </div>
@@ -118,28 +120,31 @@ function Header() {
                 <Button
                   variant="ghost"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="bg-white"
                 >
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-6 w-6 text-gray-700" />
                 </Button>
-              </div>
 
-              {/* Mobile Menu */}
-              {isMenuOpen && (
-                <div className="absolute top-16 right-0 bg-white shadow-lg rounded-lg p-4 md:hidden">
+                {/* Mobile Menu */}
+                <div
+                  className={`absolute top-16 right-0 bg-white shadow-lg rounded-lg p-4 md:hidden transition-all duration-200 ${
+                    isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                  }`}
+                >
                   <div className="flex flex-col gap-2">
                     <a href="/create-trip">
-                      <Button variant="ghost" className="w-full text-left">
-                        Create Trip
+                      <Button variant="outline" className="w-full rounded-full">
+                        + Create Trip
                       </Button>
                     </a>
                     <a href="/my-trips">
-                      <Button variant="ghost" className="w-full text-left">
+                      <Button variant="outline" className="w-full rounded-full">
                         My Trips
                       </Button>
                     </a>
                     <Button
-                      variant="ghost"
-                      className="w-full text-left text-red-500"
+                      variant="outline"
+                      className="w-full rounded-full text-red-500"
                       onClick={() => {
                         googleLogout();
                         localStorage.clear();
@@ -152,35 +157,18 @@ function Header() {
                     </Button>
                   </div>
                 </div>
-              )}
+              </div>
             </>
           ) : (
             <Button onClick={() => setOpenDialog(true)}>Sign In</Button>
           )}
         </div>
-        <Dialog open={openDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Sign In Required</DialogTitle>
-            </DialogHeader>
-
-            <div className="flex flex-col items-center text-center">
-              <img src="/web_logo.png" alt="Logo" className="h-12" />
-              <h2 className="font-bold text-md mt-4">
-                Authenticate securely using Google
-              </h2>
-
-              <Button
-                onClick={login}
-                className="w-full mt-5 flex gap-4 items-center justify-center"
-              >
-                <FcGoogle className="h-7 w-7" />
-                Sign In With Google
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
+      <SignInDialog
+        open={openDialog}
+        onLogin={login}
+        onClose={() => setOpenDialog(false)}
+      />
     </>
   );
 }

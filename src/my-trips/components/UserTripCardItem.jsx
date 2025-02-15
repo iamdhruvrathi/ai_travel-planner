@@ -7,10 +7,10 @@ const PHOTO_REF_URL =
   import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
 
 function UserTripCardItem({ trip }) {
-  const [photoUrl, setPhotoUrl] = useState("/img_NA.png");
+  const [photoUrl, setPhotoUrl] = useState("/logo.png");
 
   useEffect(() => {
-    if (trip?.userSelection?.location?.label && photoUrl === "/img_NA.png") {
+    if (trip?.userSelection?.location?.label && photoUrl === "/logo.png") {
       GetPlacePhoto();
     }
   }, [trip?.userSelection?.location?.label]);

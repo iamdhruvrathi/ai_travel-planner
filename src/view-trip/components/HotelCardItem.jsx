@@ -7,10 +7,10 @@ const PHOTO_REF_URL =
   import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
 
 function HotelCardItem({ hotel }) {
-  const [photoUrl, setPhotoUrl] = useState("/img_NA.png");
+  const [photoUrl, setPhotoUrl] = useState("/web_logo.png");
 
   useEffect(() => {
-    if (hotel?.hotelName && photoUrl === "/img_NA.png") {
+    if (hotel?.hotelName && photoUrl === "/web_logo.png") {
       GetPlacePhoto();
     }
   }, [hotel?.hotelName]);

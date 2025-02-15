@@ -1,7 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom/client"; // ✅ Use 'react-dom/client' for React 18+
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -11,6 +9,7 @@ import { Toaster } from "./components/ui/sonner";
 import ViewTrip from "./view-trip/[tripId]";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import MyTrips from "./my-trips";
+import { Analytics } from "@vercel/analytics/react";
 
 const router = createBrowserRouter([
   {

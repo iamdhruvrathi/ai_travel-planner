@@ -2,19 +2,17 @@ import React, { useEffect, useState } from "react";
 import { IoIosSend } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import { GetPlaceDetails } from "@/service/GlobalApi";
+import { ShareTripDialog } from "./ShareTripDialog";
 
 const PHOTO_REF_URL =
   "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=600&maxWidthPx=600&key=" +
   import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
 
 function InfoSection({ trip }) {
-  const [photoUrl, setPhotoUrl] = useState("/placeholder.jpg");
+  const [photoUrl, setPhotoUrl] = useState("/logo.png");
 
   useEffect(() => {
-    if (
-      trip?.userSelection?.location?.label &&
-      photoUrl === "/placeholder.jpg"
-    ) {
+    if (trip?.userSelection?.location?.label && photoUrl === "/logo.png") {
       GetPlacePhoto();
     }
   }, [trip?.userSelection?.location?.label]);
@@ -60,9 +58,7 @@ function InfoSection({ trip }) {
           </div>
         </div>
         <div className="flex items-center">
-          <Button>
-            <IoIosSend />
-          </Button>
+          <ShareTripDialog trip={trip} />
         </div>
       </div>
     </div>

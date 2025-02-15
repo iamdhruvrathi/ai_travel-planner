@@ -17,6 +17,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,6 +26,8 @@ import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Footer from "@/view-trip/components/Footer.jsx";
+import { DialogClose } from "@radix-ui/react-dialog";
+import SignInDialog from "@/components/custom/SignInDialog";
 
 function CreateTrip() {
   const [place, setPlace] = useState();
@@ -125,7 +128,12 @@ function CreateTrip() {
         .replace("{budget}", formData?.budget)
         .replace("{totalDays}", formData?.noOfDays);
       const result = await chatSession.sendMessage(FINAL_PROMPT);
-      SaveAiTrip(result?.response?.text());
+
+      try {
+        await SaveAiTrip(result?.response?.text());
+      } catch (error) {
+        toast.error("Failed to save trip data. Please try again.");
+      }
     } catch (error) {
       toast.error(error.message || "Something went wrong. Please try again.");
     } finally {
@@ -134,23 +142,22 @@ function CreateTrip() {
   };
 
   const SaveAiTrip = async (TripData) => {
-    setLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       const docId = Date.now().toString();
 
-      await setDoc(doc(db, "AITrips", docId), {
+      const tripDoc = {
         userSelection: formData,
         tripData: JSON.parse(TripData),
         userEmail: user?.email,
         id: docId,
-      });
+      };
 
+      await setDoc(doc(db, "AITrips", docId), tripDoc);
       navigate("/view-trip/" + docId);
     } catch (error) {
-      toast.error("Failed to save trip. Please try again.");
-    } finally {
-      setLoading(false);
+      console.error("Error saving trip:", error);
+      throw error; // Re-throw to be handled by caller
     }
   };
 
@@ -238,37 +245,23 @@ function CreateTrip() {
           </div>
         </div>
       </div>
-      <div className="my-10 justify-end flex">
-        <Button disabled={loading} onClick={OnGenerateTrip}>
-          {loading ? (
-            <AiOutlineLoading3Quarters className="h-7 w-7 animate-spin" />
-          ) : (
-            "Generate Trip"
-          )}
-        </Button>
-      </div>
-      <Dialog open={openDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Sign In Required</DialogTitle>
-          </DialogHeader>
-
-          <div className="flex flex-col items-center text-center">
-            <img src="/web_logo.png" alt="Logo" className="h-12" />
-            <h2 className="font-bold text-md mt-4">
-              Authenticate securely using Google
-            </h2>
-
-            <Button
-              onClick={login}
-              className="w-full mt-5 flex gap-4 items-center justify-center"
-            >
-              <FcGoogle className="h-7 w-7" />
-              Sign In With Google
-            </Button>
+      {loading ? (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center gap-4">
+            <AiOutlineLoading3Quarters className="h-10 w-10 animate-spin text-primary" />
+            <p className="text-lg font-medium">AI is generating your trip...</p>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      ) : (
+        <div className="my-10 justify-end flex">
+          <Button onClick={OnGenerateTrip}>Generate Trip</Button>
+        </div>
+      )}
+      <SignInDialog
+        open={openDialog}
+        onLogin={login}
+        onClose={() => setOpenDialog(false)}
+      />
       <Footer />
     </div>
   );
