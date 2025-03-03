@@ -1,12 +1,11 @@
 # AI Travel Planner
 ## Smart Travel Companion for Personalized Itineraries
 ***
-
 A web-based platform that helps users effortlessly plan trips using AI-generated recommendations, real-time data analysis, and an intuitive user interface.
 
-- **User Authentication (Google Auth):** Secure and seamless authentication using Google Sign-In, allowing users to access and manage their trips with ease.
+- **User Authentication (Google Auth):** Secure and seamless authentication using Google Sign-In, allowing users to access and manage their trips easily.
 
-![Google Authentication](https://github.com/your-repo-link/Working-app-ss/google-auth.jpg?raw=true)
+![Google Authentication](https://raw.githubusercontent.com/iamdhruvrathi/ai_travel-planner/refs/heads/main/app-screenshots/googleAuth.png)
 
 - **Landing Page:** A simple and visually appealing home page where users can explore the platform's features before signing up or logging in.
 
