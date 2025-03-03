@@ -98,11 +98,15 @@ function CreateTrip() {
       return;
     }
 
+    if (formData?.noOfDays < 0) {
+      toast.error("Enter valid trip duration");
+      return;
+    }
+
     setLoading(true);
     try {
       const userData = JSON.parse(user);
 
-      // Verify token is still valid
       try {
         await axios.get(
           `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${userData.access_token}`,
@@ -131,6 +135,7 @@ function CreateTrip() {
 
       try {
         await SaveAiTrip(result?.response?.text());
+        console.log(result?.response?.text());
       } catch (error) {
         toast.error("Failed to save trip data. Please try again.");
       }
