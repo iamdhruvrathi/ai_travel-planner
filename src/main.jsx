@@ -9,7 +9,7 @@ import { Toaster } from "./components/ui/sonner";
 import ViewTrip from "./view-trip/[tripId]";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import MyTrips from "./my-trips";
-import { Analytics } from "@vercel/analytics/react";
+import Anlytics from "./Anlytics";
 
 const router = createBrowserRouter([
   {
@@ -45,6 +45,14 @@ const router = createBrowserRouter([
       <>
         <Header />
         <MyTrips />
+      </>
+    ),
+  },
+  {
+    path: "analytics",
+    element: (
+      <>
+        <Anlytics />
       </>
     ),
   },
