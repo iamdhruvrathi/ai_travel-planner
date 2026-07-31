@@ -38,14 +38,26 @@ function PlacesToVisit({ trip }) {
         {sortedKeys.map((key, index) => (
           <div key={index} className="rounded-lg bg-gray-50 p-4 sm:p-6">
             <h3 className="font-semibold text-lg sm:text-xl mb-3 sm:mb-4 text-gray-800">
-              {key.match(/day\d+/)
-                ? `Day ${key.match(/\d+/)[0]}`
-                : key.charAt(0).toUpperCase() + key.slice(1)}
+              {Number.isNaN(Number(key))
+                ? key.match(/day\d+/i)
+                  ? `Day ${key.match(/\d+/)[0]}`
+                  : key.charAt(0).toUpperCase() + key.slice(1)
+                : `Day ${Number(key) + 1}`}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {Array.isArray(itinerary[key]) ? (
+              {itinerary[key]?.theme && (
+                <p className="col-span-full text-gray-600 mb-2 italic">
+                  {itinerary[key].theme}
+                </p>
+              )}
+
+              {Array.isArray(itinerary[key]?.plan) ? (
+                itinerary[key].plan.map((place, idx) => (
+                  <PlaceCardItem key={place.placeName || idx} place={place} />
+                ))
+              ) : Array.isArray(itinerary[key]) ? (
                 itinerary[key].map((place, idx) => (
-                  <PlaceCardItem key={idx} place={place} />
+                  <PlaceCardItem key={place.placeName || idx} place={place} />
                 ))
               ) : (
                 <PlaceCardItem place={itinerary[key]} />
