@@ -1,23 +1,27 @@
 // Import the required Firebase SDK functions
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore"; // Import Firestore
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Your Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "ai-travel-planner-b3987.firebaseapp.com",
   projectId: "ai-travel-planner-b3987",
-  storageBucket: "ai-travel-planner-b3987.appspot.com", // ✅ Fixed storageBucket
+  storageBucket: "ai-travel-planner-b3987.appspot.com",
   messagingSenderId: "127529745310",
   appId: "1:127529745310:web:97be472b82b1e46eeb748f",
   measurementId: "G-TN7ZM4P4JB",
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig); // ✅ Corrected
-const db = getFirestore(app); // ✅ Initialize Firestore properly
-const analytics = getAnalytics(app); // ✅ Corrected app reference
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+let analytics = null;
 
-// Export instances for use in other files
-export { app, db, analytics };
+if (typeof window !== "undefined") {
+  analytics = getAnalytics(app);
+}
+
+export { app, db, auth, analytics };
