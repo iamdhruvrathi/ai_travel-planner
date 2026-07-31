@@ -1,6 +1,6 @@
 # ✈️ AI Travel Planner
 
-[![React](https://img.shields.io/badge/react-18.3-brightgreen)](https://reactjs.org/) [![Vite](https://img.shields.io/badge/vite-^8.0-blueviolet)](https://vitejs.dev/) [![Firebase](https://img.shields.io/badge/firebase-11.x-orange)](https://firebase.google.com/) [![License](https://img.shields.io/badge/license-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![React](https://img.shields.io/badge/react-18.3-brightgreen)](https://reactjs.org/) [![Vite](https://img.shields.io/badge/vite-^8.0-blueviolet)](https://vitejs.dev/) [![Firebase](https://img.shields.io/badge/firebase-11.x-orange)](https://firebase.google.com/)
 
 ## Smart Travel Companion for Personalized Itineraries
 
@@ -8,7 +8,7 @@ A user-focused React + Vite web application that generates personalized travel i
 
 ---
 
-## What this repo already provides
+## What this repo has
 
 - Web UI built with React + Vite and Tailwind styles (client-side SPA).
 - Google OAuth sign-in (via @react-oauth/google) and Google Places autocomplete for destination input.
@@ -19,9 +19,9 @@ A user-focused React + Vite web application that generates personalized travel i
 
 ---
 
-## Features (evidence-backed)
+## Features
 
-- Landing page and visual UI screens (see `app-screenshots/` images included).
+- Landing page and visual UI screens.
 - Google Sign-In for authentication flow (`@react-oauth/google` used in `src/main.jsx` and create-trip).
 - Destination input with Google Places Autocomplete (`react-google-places-autocomplete` used in `src/create-trip/index.jsx`).
 - AI itinerary generation via `src/service/AIModal.jsx` using `@google/generative-ai`.
@@ -32,12 +32,12 @@ A user-focused React + Vite web application that generates personalized travel i
 
 ## Tech Stack
 
-- Language: JavaScript (ESM)
-- Framework / Runtime: React 18 + Vite
-- UI: Tailwind CSS (+ shadcn/ui components), radux UI primitives
+- Language: JavaScript
+- Framework / Runtime: React (Vite)
+- UI: Tailwind CSS (+ shadcn/ui components)
 - Auth & DB: Firebase Authentication & Firestore
 - AI: Google Generative AI (Gemini) via `@google/generative-ai`
-- Other notable libs: axios, react-google-places-autocomplete, @react-oauth/google
+- Other notable libs: axios, react-google-places-autocomplete
 
 ---
 
@@ -72,7 +72,6 @@ A user-focused React + Vite web application that generates personalized travel i
 Prerequisites:
 - Node.js (recommended latest LTS)
 - npm or Yarn
-- ffmpeg is not required by this project (unlike other repos) — skip.
 
 Install and run:
 
@@ -90,11 +89,6 @@ npm run dev
 # build for production
 npm run build
 ```
-
-If you encounter peer dependency conflicts when running `npm install` (for example Vite vs @vitejs/plugin-react), follow the troubleshooting options in the repository issues or use one of:
-
-- Quick (temporary) install: `npm install --legacy-peer-deps`
-- Or align versions: pin `vite` to a compatible version or upgrade `@vitejs/plugin-react`.
 
 ---
 
@@ -121,18 +115,6 @@ Note: `src/service/firebaseConfig.*` already hard-codes some Firebase values (au
 2. On the landing page, sign in with Google when prompted (this uses Google OAuth and stores Google token locally).
 3. Create Trip: provide destination (Google Places autocomplete), days, budget, travellers and generate a trip — the app will call Gemini and then attempt to save the generated trip to Firestore.
 4. My Trips: visit the My Trips page to see trips for the signed-in user (relies on Firebase Authentication and Firestore reads).
-
----
-
-## Key implementation notes & observed inconsistencies
-
-- Firebase is initialized in `src/service/firebaseConfig.{js,jsx}` and exports `auth`, `db`, and `analytics` for use across the app.
-- CreateTrip's `SaveAiTrip` writes to Firestore collection `AITrips` (`setDoc(doc(db, "AITrips", docId), tripDoc)`).
-- MyTrips queries `users/{uid}/trips` (`collection(db, "users", uid, "trips")`) to list trips for the current user. These two write/read paths are not aligned in the current codebase; you may want to standardize on a single schema (either place generated trips under `AITrips` and query that, or write generated trips into `users/{uid}/trips`). This mismatch is observed in code and should be addressed if you expect the CreateTrip saved items to appear in MyTrips.
-
-- If you see runtime errors like `Installations: ... API key not valid` or Firestore `Missing or insufficient permissions`, check:
-  - That `VITE_FIREBASE_API_KEY` is the Web API key from Firebase Console for the same project (`ai-travel-planner-b3987`) and that the key is not restricted or has proper HTTP referrers added for your dev host (localhost).
-  - That the app actually signs the Google OAuth user into Firebase Auth (the current code stores a Google access token in localStorage but does not always call `signInWithCredential(auth, GoogleAuthProvider.credential(...))`; Firestore rules expect `request.auth` for authorized reads/writes).
 
 ---
 
@@ -168,24 +150,6 @@ Note: `src/service/firebaseConfig.*` already hard-codes some Firebase values (au
 
 ---
 
-## Future improvements (recommended)
-
-- Standardize Firestore schema (choose `AITrips` or `users/{uid}/trips`) and update read/write flows.
-- After Google OAuth, sign user into Firebase Auth with `signInWithCredential` to make Firestore security rules straightforward.
-- Add robust error handling and user feedback for network/API key failures (current console errors point to invalid API key or permission errors).
-- Add tests, CI, and a Dockerfile to make development and deployment reproducible.
-- Consider server-side proxying for secreted API calls (if applicable) and add rate-limiting / caching for Gemini requests.
-
----
-
 ## Author
 
 Dhruv (GitHub: @iamdhruvrathi)
-
-If you want, I can:
-- open a PR that standardizes the Firestore schema and updates CreateTrip to write into `users/{uid}/trips`, or
-- add the Firebase signInWithCredential flow after Google OAuth (small patch to `create-trip/index.jsx`) to fix the `Missing or insufficient permissions` errors.
-
----
-
-*(This README preserves the original visual assets and descriptions and adds a developer-focused overview, setup steps, and observed code notes so maintainers and recruiters can quickly understand and run the project.)*
