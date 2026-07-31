@@ -10,23 +10,11 @@ import {
 import { toast } from "sonner";
 import { chatSession } from "@/service/AIModal.jsx";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "@/service/firebaseConfig.jsx";
+import { auth, db } from "@/service/firebaseConfig.js";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { FcGoogle } from "react-icons/fc";
-import { useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Footer from "@/view-trip/components/Footer.jsx";
-import { DialogClose } from "@radix-ui/react-dialog";
 import SignInDialog from "@/components/custom/SignInDialog";
 
 function CreateTrip() {
@@ -47,43 +35,33 @@ function CreateTrip() {
     console.log(formData);
   }, [formData]);
 
-  const GetUserProfile = (tokenInfo) => {
-    axios
-      .get(
-        `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenInfo?.access_token}`,
-            Accept: "application/json",
-          },
-        }
-      )
-      .then((resp) => {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...resp.data,
-            access_token: tokenInfo.access_token,
-          })
-        );
-        setOpenDialog(false);
-        OnGenerateTrip();
-      })
-      .catch((error) => {
-        toast.error("Failed to get user profile");
-        setOpenDialog(true);
-      });
+  const login = async () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("profile");
+    provider.addScope("email");
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+      const profile = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName,
+        picture: firebaseUser.photoURL,
+      };
+
+      localStorage.setItem("user", JSON.stringify(profile));
+      setOpenDialog(false);
+      await OnGenerateTrip();
+    } catch (error) {
+      console.error("Google sign-in failed:", error);
+      toast.error("Failed to sign in. Please try again.");
+      setOpenDialog(true);
+    }
   };
 
-  const login = useGoogleLogin({
-    onSuccess: (codeResp) => GetUserProfile(codeResp),
-    onError: (error) => console.log(error),
-  });
-
   const OnGenerateTrip = async () => {
-    const user = localStorage.getItem("user");
-
-    if (!user) {
+    if (!auth.currentUser?.uid) {
       setOpenDialog(true);
       return;
     }
@@ -105,27 +83,9 @@ function CreateTrip() {
 
     setLoading(true);
     try {
-      const userData = JSON.parse(user);
-
-      try {
-        await axios.get(
-          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${userData.access_token}`,
-          {
-            headers: {
-              Authorization: `Bearer ${userData.access_token}`,
-              Accept: "application/json",
-            },
-          }
-        );
-      } catch (error) {
-        localStorage.removeItem("user");
-        setOpenDialog(true);
-        throw new Error("Authentication expired. Please sign in again.");
-      }
-
       const FINAL_PROMPT = AI_PROMPT.replace(
         "{location}",
-        formData?.location?.label
+        formData?.location?.label,
       )
         .replace("{totalDays}", formData?.noOfDays)
         .replace("{traveller}", formData?.traveller)
@@ -148,21 +108,27 @@ function CreateTrip() {
 
   const SaveAiTrip = async (TripData) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      const docId = Date.now().toString();
+      const currentUser = auth.currentUser;
 
+      if (!currentUser?.uid) {
+        throw new Error("You must be signed in to save a trip.");
+      }
+
+      const docId = Date.now().toString();
       const tripDoc = {
         userSelection: formData,
         tripData: JSON.parse(TripData),
-        userEmail: user?.email,
+        userEmail: currentUser?.email || "",
+        userId: currentUser.uid,
         id: docId,
+        createdAt: new Date().toISOString(),
       };
 
-      await setDoc(doc(db, "AITrips", docId), tripDoc);
+      await setDoc(doc(db, "users", currentUser.uid, "trips", docId), tripDoc);
       navigate("/view-trip/" + docId);
     } catch (error) {
       console.error("Error saving trip:", error);
-      throw error; // Re-throw to be handled by caller
+      throw error;
     }
   };
 

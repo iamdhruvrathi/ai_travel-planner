@@ -6,16 +6,21 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@radix-ui/react-popover";
-import { googleLogout, useGoogleLogin } from "@react-oauth/google";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FcGoogle } from "react-icons/fc";
 import { Menu } from "lucide-react";
-import axios from "axios";
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
+import { toast } from "sonner";
+import { auth } from "@/service/firebaseConfig.js";
 import SignInDialog from "./SignInDialog";
 
 function Header() {
@@ -24,44 +29,51 @@ function Header() {
   const [openDialog, setOpenDialog] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const login = useGoogleLogin({
-    onSuccess: (codeResp) => GetUserProfile(codeResp),
-    onError: (error) => console.log(error),
-  });
+  const login = async () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("profile");
+    provider.addScope("email");
 
-  const GetUserProfile = (tokenInfo) => {
-    axios
-      .get(
-        `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenInfo?.access_token}`,
-            Accept: "application/json",
-          },
-        }
-      )
-      .then((resp) => {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...resp.data,
-            access_token: tokenInfo.access_token,
-          })
-        );
-        setOpenDialog(false);
-        window.location.reload();
-      })
-      .catch((error) => {
-        toast.error("Failed to get user profile");
-        setOpenDialog(true);
-      });
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+      const profile = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName,
+        picture: firebaseUser.photoURL,
+      };
+
+      localStorage.setItem("user", JSON.stringify(profile));
+      setUser(profile);
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Google sign-in failed:", error);
+      toast.error("Failed to sign in. Please try again.");
+      setOpenDialog(true);
+    }
   };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser) {
+        setUser(null);
+        localStorage.removeItem("user");
+        return;
+      }
+
+      const profile = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName,
+        picture: firebaseUser.photoURL,
+      };
+
+      setUser(profile);
+      localStorage.setItem("user", JSON.stringify(profile));
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -102,11 +114,16 @@ function Header() {
                     <Button
                       variant="outline"
                       className="w-full rounded-full text-red-500"
-                      onClick={() => {
-                        googleLogout();
-                        localStorage.clear();
-                        setUser(null);
-                        navigate("/");
+                      onClick={async () => {
+                        try {
+                          await signOut(auth);
+                          localStorage.removeItem("user");
+                          setUser(null);
+                          navigate("/");
+                        } catch (error) {
+                          console.error("Sign out failed:", error);
+                          toast.error("Failed to sign out.");
+                        }
                       }}
                     >
                       Logout
@@ -145,12 +162,17 @@ function Header() {
                     <Button
                       variant="outline"
                       className="w-full rounded-full text-red-500"
-                      onClick={() => {
-                        googleLogout();
-                        localStorage.clear();
-                        setUser(null);
-                        navigate("/");
-                        setIsMenuOpen(false);
+                      onClick={async () => {
+                        try {
+                          await signOut(auth);
+                          localStorage.removeItem("user");
+                          setUser(null);
+                          navigate("/");
+                          setIsMenuOpen(false);
+                        } catch (error) {
+                          console.error("Sign out failed:", error);
+                          toast.error("Failed to sign out.");
+                        }
                       }}
                     >
                       Logout

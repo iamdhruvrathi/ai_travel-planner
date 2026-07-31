@@ -1,7 +1,9 @@
-import { db } from "@/service/firebaseConfig";
+import { auth, db } from "@/service/firebaseConfig.js";
 import { doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import InfoSection from "../components/InfoSection";
 import Hotels from "../components/Hotels";
 import PlacesToVisit from "../components/PlacesToVisit";
@@ -13,24 +15,26 @@ function Viewtrip() {
   const [trip, setTrip] = useState([]);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
-      navigate("/");
-      return;
-    }
-    tripId && GetTripData();
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser?.uid) {
+        navigate("/");
+        return;
+      }
+
+      tripId && GetTripData(firebaseUser.uid);
+    });
+
+    return () => unsubscribe();
   }, [tripId, navigate]);
 
-  const GetTripData = async () => {
-    const docRef = doc(db, "AITrips", tripId);
+  const GetTripData = async (uid) => {
+    const docRef = doc(db, "users", uid, "trips", tripId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      console.log("Document:", docSnap.data());
       setTrip(docSnap.data());
     } else {
-      console.log("No Such Document");
-      toast("No trip Found!");
+      toast.error("No trip found.");
     }
   };
   return (

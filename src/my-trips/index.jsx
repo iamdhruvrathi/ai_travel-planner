@@ -1,5 +1,6 @@
-import { db } from "@/service/firebaseConfig";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { auth, db } from "@/service/firebaseConfig.js";
+import { collection, getDocs } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserTripCardItem from "./components/UserTripCardItem";
@@ -10,49 +11,30 @@ function MyTrips() {
   const [userTrips, setUserTrips] = useState([]);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
-      navigate("/");
-      return;
-    }
-    GetUserTrips();
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser?.uid) {
+        navigate("/");
+        return;
+      }
+
+      GetUserTrips(firebaseUser.uid);
+    });
+
+    return () => unsubscribe();
   }, [navigate]);
 
-  const GetUserTrips = async () => {
-    const storedUser = localStorage.getItem("user");
-
-    if (!storedUser) {
-      console.warn("User not found in localStorage. Redirecting...");
-      navigate("/");
-      return;
-    }
-
-    const user = JSON.parse(storedUser);
-    console.log("User from Local Storage:", user);
-
-    if (!user?.email) {
-      console.error("User email is missing. Redirecting...");
-      navigate("/");
-      return;
-    }
-
+  const GetUserTrips = async (uid) => {
     try {
-      const q = query(
-        collection(db, "AITrips"),
-        where("userEmail", "==", user.email)
-      );
-
-      const querySnapshot = await getDocs(q);
+      const tripsRef = collection(db, "users", uid, "trips");
+      const querySnapshot = await getDocs(tripsRef);
 
       if (querySnapshot.empty) {
-        console.log("No trips found for this user.");
-        setUserTrips([]); // Clear trips state
+        setUserTrips([]);
       } else {
-        const tripData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
+        const tripData = querySnapshot.docs.map((docSnapshot) => ({
+          id: docSnapshot.id,
+          ...docSnapshot.data(),
         }));
-        console.log("Fetched Trips:", tripData);
         setUserTrips(tripData);
       }
     } catch (error) {
